@@ -1,0 +1,344 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model acreditaciones {
+  id             Int         @id @default(autoincrement())
+  nombre         String      @db.VarChar(100)
+  medio          String      @db.VarChar(100)
+  email          String      @db.VarChar(120)
+  tipo           String      @db.VarChar(12)
+  dia_id         Int
+  escenario_id   Int?
+  estado         String      @default("PENDIENTE") @db.VarChar(10)
+  motivo_rechazo String?     @db.VarChar(300)
+  state          String      @default("ACTIVE") @db.VarChar(20)
+  created_at     DateTime    @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime    @default(now()) @db.Timestamptz(6)
+  dias           dias        @relation(fields: [dia_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  escenarios     escenarios? @relation(fields: [escenario_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model artistas {
+  id              Int               @id @default(autoincrement())
+  nombre          String            @unique @db.VarChar(100)
+  genero          String            @db.VarChar(60)
+  pais            String            @db.VarChar(60)
+  productos_merch productos_merch[]
+  shows           shows[]
+}
+
+model asistentes {
+  id                   Int                    @id @default(autoincrement())
+  nombre               String                 @db.VarChar(100)
+  email                String                 @unique @db.VarChar(120)
+  documento            String                 @unique @db.VarChar(20)
+  fecha_nacimiento     DateTime               @db.Date
+  boletas              boletas[]
+  incidentes           incidentes[]
+  inscripciones_meet   inscripciones_meet[]
+  movimientos          movimientos[]
+  objetos_perdidos     objetos_perdidos[]
+  pedidos_comida       pedidos_comida[]
+  resenas              resenas[]
+  reservas_bus         reservas_bus[]
+  reservas_camping     reservas_camping[]
+  reservas_parqueadero reservas_parqueadero[]
+  ventas_merch         ventas_merch[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model boletas {
+  id           Int        @id @default(autoincrement())
+  asistente_id Int
+  dia_id       Int
+  tipo         String     @db.VarChar(10)
+  precio       Int
+  state        String     @default("ACTIVE") @db.VarChar(20)
+  created_at   DateTime   @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime   @default(now()) @db.Timestamptz(6)
+  asistentes   asistentes @relation(fields: [asistente_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  dias         dias       @relation(fields: [dia_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model buses {
+  id           Int            @id @default(autoincrement())
+  ruta         String         @db.VarChar(100)
+  dia_id       Int
+  hora_salida  String         @db.VarChar(5)
+  capacidad    Int
+  estado       String         @default("PROGRAMADO") @db.VarChar(12)
+  state        String         @default("ACTIVE") @db.VarChar(20)
+  created_at   DateTime       @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime       @default(now()) @db.Timestamptz(6)
+  dias         dias           @relation(fields: [dia_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  reservas_bus reservas_bus[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model dias {
+  id                   Int                    @id @default(autoincrement())
+  nombre               String                 @db.VarChar(40)
+  fecha                DateTime               @unique @db.Date
+  aforo                Int
+  acreditaciones       acreditaciones[]
+  boletas              boletas[]
+  buses                buses[]
+  incidentes           incidentes[]
+  objetos_perdidos     objetos_perdidos[]
+  reservas_parqueadero reservas_parqueadero[]
+  shows                shows[]
+  turnos               turnos[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model escenarios {
+  id             Int              @id @default(autoincrement())
+  nombre         String           @unique @db.VarChar(80)
+  capacidad      Int
+  acreditaciones acreditaciones[]
+  shows          shows[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model incidentes {
+  id           Int         @id @default(autoincrement())
+  asistente_id Int?
+  zona_id      Int
+  dia_id       Int
+  severidad    String      @db.VarChar(10)
+  descripcion  String      @db.VarChar(500)
+  estado       String      @default("ABIERTO") @db.VarChar(12)
+  state        String      @default("ACTIVE") @db.VarChar(20)
+  created_at   DateTime    @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime    @default(now()) @db.Timestamptz(6)
+  asistentes   asistentes? @relation(fields: [asistente_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  dias         dias        @relation(fields: [dia_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  zonas        zonas       @relation(fields: [zona_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model inscripciones_meet {
+  id           Int        @id @default(autoincrement())
+  asistente_id Int
+  show_id      Int
+  state        String     @default("ACTIVE") @db.VarChar(20)
+  created_at   DateTime   @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime   @default(now()) @db.Timestamptz(6)
+  asistentes   asistentes @relation(fields: [asistente_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  shows        shows      @relation(fields: [show_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model movimientos {
+  id           Int        @id @default(autoincrement())
+  asistente_id Int
+  tipo         String     @db.VarChar(8)
+  monto        Int
+  descripcion  String?    @db.VarChar(200)
+  state        String     @default("ACTIVE") @db.VarChar(20)
+  created_at   DateTime   @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime   @default(now()) @db.Timestamptz(6)
+  asistentes   asistentes @relation(fields: [asistente_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([asistente_id, state, tipo, monto], map: "movimientos_wallet_balance_idx")
+  @@index([asistente_id, state, id], map: "movimientos_wallet_page_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model objetos_perdidos {
+  id                         Int         @id @default(autoincrement())
+  descripcion                String      @db.VarChar(300)
+  categoria                  String      @db.VarChar(15)
+  zona_id                    Int
+  dia_id                     Int
+  voluntario_id              Int
+  estado                     String      @default("EN_BODEGA") @db.VarChar(10)
+  reclamado_por_asistente_id Int?
+  fecha_entrega              DateTime?   @db.Timestamptz(6)
+  state                      String      @default("ACTIVE") @db.VarChar(20)
+  created_at                 DateTime    @default(now()) @db.Timestamptz(6)
+  updated_at                 DateTime    @default(now()) @db.Timestamptz(6)
+  dias                       dias        @relation(fields: [dia_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  asistentes                 asistentes? @relation(fields: [reclamado_por_asistente_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  voluntarios                voluntarios @relation(fields: [voluntario_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  zonas                      zonas       @relation(fields: [zona_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model pedidos_comida {
+  id               Int              @id @default(autoincrement())
+  asistente_id     Int
+  producto_id      Int
+  cantidad         Int
+  total            Int
+  estado           String           @default("PENDIENTE") @db.VarChar(12)
+  state            String           @default("ACTIVE") @db.VarChar(20)
+  created_at       DateTime         @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime         @default(now()) @db.Timestamptz(6)
+  asistentes       asistentes       @relation(fields: [asistente_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  productos_comida productos_comida @relation(fields: [producto_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model productos_comida {
+  id             Int              @id @default(autoincrement())
+  nombre         String           @db.VarChar(100)
+  zona_id        Int
+  precio         Int
+  stock          Int
+  state          String           @default("ACTIVE") @db.VarChar(20)
+  created_at     DateTime         @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime         @default(now()) @db.Timestamptz(6)
+  pedidos_comida pedidos_comida[]
+  zonas          zonas            @relation(fields: [zona_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model productos_merch {
+  id           Int            @id @default(autoincrement())
+  nombre       String         @db.VarChar(100)
+  artista_id   Int?
+  precio       Int
+  stock        Int
+  state        String         @default("ACTIVE") @db.VarChar(20)
+  created_at   DateTime       @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime       @default(now()) @db.Timestamptz(6)
+  artistas     artistas?      @relation(fields: [artista_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ventas_merch ventas_merch[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model resenas {
+  id           Int        @id @default(autoincrement())
+  asistente_id Int
+  show_id      Int
+  puntaje      Int
+  comentario   String?    @db.VarChar(500)
+  state        String     @default("ACTIVE") @db.VarChar(20)
+  created_at   DateTime   @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime   @default(now()) @db.Timestamptz(6)
+  asistentes   asistentes @relation(fields: [asistente_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  shows        shows      @relation(fields: [show_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model reservas_bus {
+  id           Int        @id @default(autoincrement())
+  asistente_id Int
+  bus_id       Int
+  state        String     @default("ACTIVE") @db.VarChar(20)
+  created_at   DateTime   @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime   @default(now()) @db.Timestamptz(6)
+  asistentes   asistentes @relation(fields: [asistente_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  buses        buses      @relation(fields: [bus_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model reservas_camping {
+  id            Int        @id @default(autoincrement())
+  asistente_id  Int
+  zona_id       Int
+  fecha_entrada DateTime   @db.Date
+  fecha_salida  DateTime   @db.Date
+  personas      Int
+  state         String     @default("ACTIVE") @db.VarChar(20)
+  created_at    DateTime   @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime   @default(now()) @db.Timestamptz(6)
+  asistentes    asistentes @relation(fields: [asistente_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  zonas         zonas      @relation(fields: [zona_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model reservas_parqueadero {
+  id            Int        @id @default(autoincrement())
+  asistente_id  Int
+  zona_id       Int
+  dia_id        Int
+  placa         String     @db.VarChar(6)
+  tipo_vehiculo String     @db.VarChar(5)
+  state         String     @default("ACTIVE") @db.VarChar(20)
+  created_at    DateTime   @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime   @default(now()) @db.Timestamptz(6)
+  asistentes    asistentes @relation(fields: [asistente_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  dias          dias       @relation(fields: [dia_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  zonas         zonas      @relation(fields: [zona_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model shows {
+  id                 Int                  @id @default(autoincrement())
+  artista_id         Int
+  escenario_id       Int
+  dia_id             Int
+  hora_inicio        String               @db.VarChar(5)
+  hora_fin           String               @db.VarChar(5)
+  state              String               @default("ACTIVE") @db.VarChar(20)
+  created_at         DateTime             @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime             @default(now()) @db.Timestamptz(6)
+  inscripciones_meet inscripciones_meet[]
+  resenas            resenas[]
+  artistas           artistas             @relation(fields: [artista_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  dias               dias                 @relation(fields: [dia_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  escenarios         escenarios           @relation(fields: [escenario_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model turnos {
+  id            Int         @id @default(autoincrement())
+  voluntario_id Int
+  zona_id       Int
+  dia_id        Int
+  hora_inicio   String      @db.VarChar(5)
+  hora_fin      String      @db.VarChar(5)
+  rol           String      @db.VarChar(20)
+  state         String      @default("ACTIVE") @db.VarChar(20)
+  created_at    DateTime    @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime    @default(now()) @db.Timestamptz(6)
+  dias          dias        @relation(fields: [dia_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  voluntarios   voluntarios @relation(fields: [voluntario_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  zonas         zonas       @relation(fields: [zona_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model ventas_merch {
+  id              Int             @id @default(autoincrement())
+  asistente_id    Int
+  producto_id     Int
+  cantidad        Int
+  total           Int
+  state           String          @default("ACTIVE") @db.VarChar(20)
+  created_at      DateTime        @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime        @default(now()) @db.Timestamptz(6)
+  asistentes      asistentes      @relation(fields: [asistente_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  productos_merch productos_merch @relation(fields: [producto_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model voluntarios {
+  id               Int                @id @default(autoincrement())
+  nombre           String             @db.VarChar(100)
+  email            String             @unique @db.VarChar(120)
+  telefono         String             @db.VarChar(20)
+  objetos_perdidos objetos_perdidos[]
+  turnos           turnos[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model zonas {
+  id                   Int                    @id @default(autoincrement())
+  nombre               String                 @unique @db.VarChar(80)
+  tipo                 String                 @db.VarChar(20)
+  capacidad            Int
+  incidentes           incidentes[]
+  objetos_perdidos     objetos_perdidos[]
+  productos_comida     productos_comida[]
+  reservas_camping     reservas_camping[]
+  reservas_parqueadero reservas_parqueadero[]
+  turnos               turnos[]
+}
